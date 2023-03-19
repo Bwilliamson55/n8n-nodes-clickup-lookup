@@ -1,0 +1,25 @@
+{
+	"node": "n8n-nodes-clickuplookup",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Productivity", "Communication"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.n8n.io/credentials/clickUp"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-clickuplookup/"
+			}
+		],
+		"generic": [
+			{
+				"label": "Use ClickUp and n8n to automate all the things.",
+				"icon": "☀️",
+				"url": "https://n8n.io/blog/2021-the-year-to-automate-the-new-you-with-n8n/"
+			}
+		]
+	}
+}

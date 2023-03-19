@@ -1,19 +1,19 @@
 {
-  "name": "n8n-nodes-<...>",
+  "name": "n8n-nodes-clickuplookup",
   "version": "0.1.0",
   "description": "",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package", "clickup"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/bwilliamson55/n8n-nodes-clickup-lookup.git",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "Bwilliamson",
+    "email": "bwilliamson@mail.weeumson.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/bwilliamson55/n8n-nodes-clickup-lookup.git"
   },
   "main": "index.js",
   "scripts": {
@@ -30,12 +30,11 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ExampleCredentialsApi.credentials.js",
-      "dist/credentials/HttpBinApi.credentials.js"
+      "dist/credentials/ClickupLookupApi.credentials.js",
+      "dist/credentials/ClickupLookupOAuth2Api.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "dist/nodes/HttpBin/HttpBin.node.js"
+      "dist/nodes/ClickupLookup/ClickupLookup.node.js"
     ]
   },
   "devDependencies": {
