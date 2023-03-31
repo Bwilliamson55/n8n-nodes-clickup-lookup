@@ -7,16 +7,13 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
-	NodeOperationError,
 } from 'n8n-workflow';
 
-import { clickupApiRequest, clickupApiRequestAllItems, validateJSON } from './GenericFunctions';
+import { clickupApiRequest } from './GenericFunctions';
 
 import { taskFields, taskOperations } from './TaskDescription';
 
 import type { ICustomFieldsUi } from './CustomFieldsUiInterface';
-
-import { ITask } from './TaskInterface';
 
 export class ClickupLookup implements INodeType {
 	description: INodeTypeDescription = {
@@ -360,7 +357,6 @@ export class ClickupLookup implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 		const length = items.length;
-		const qs: IDataObject = {};
 		let responseData;
 
 		const resource = this.getNodeParameter('resource', 0);
@@ -369,309 +365,50 @@ export class ClickupLookup implements INodeType {
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'task') {
-					if (operation === 'create') {
+					if (operation === 'lookup') {
 						const listId = this.getNodeParameter('list', i) as string;
-						const name = this.getNodeParameter('name', i) as string;
 						const customFieldsUi = this.getNodeParameter('customFieldsUi', i) as ICustomFieldsUi;
-						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const { fields } = await clickupApiRequest.call(this, 'GET', `/list/${listId}/field`);
 
-						const body: ITask = {
-							name,
-						};
-						if (additionalFields.customFieldsJson) {
-							const customFields = validateJSON(additionalFields.customFieldsJson as string);
-							if (customFields === undefined) {
-								throw new NodeOperationError(this.getNode(), 'Custom Fields: Invalid JSON', {
-									itemIndex: i,
-								});
-							}
-							body.custom_fields = customFields;
-						}
 						if (customFieldsUi.customFieldsValues) {
 							const customFields: IDataObject[] = [];
 							for (const customFieldValue of customFieldsUi.customFieldsValues) {
 								const fieldid = customFieldValue?.fieldKey?.toString().split('|')[0];
 								const fieldtype = customFieldValue?.fieldKey?.toString().split('|')[1];
-								let val = '' as string | number | string[];
+								let matchResult = 'no match found';
+
+								//value is the value to lookup
+								const value = customFieldValue.value?.toString();
+								// id, name, color - name is default
+								const matchTo = customFieldValue.matchTo?.toString();
+								// id, name, color, object - id is default
+								const outputType = customFieldValue.output?.toString();
+
+								const field = fields.find((f: any) => f.id == fieldid);
 
 								if (['drop_down', 'labels'].includes(fieldtype?.toString() ?? '')) {
-									const whenThis = customFieldValue.whenThis?.toString();
-									const vals = customFieldValue.dropDownMapperUi?.dropDownMapperValues?.filter(
-										(mapval) => {
-											return whenThis == mapval.saysThis;
-										},
-									);
-									const valarr = vals?.map((v) => v.value);
-									//Drop down field value is the int-id of the string option,
-									// labels field values are an array of guids for their string options
-									if (fieldtype == 'drop_down') {
-										val = valarr?.toString().split(',')[0] ?? '';
-									} else {
-										// TODO: assert unique values
-										val = valarr?.toString().split(',') ?? [];
+									let match = field.type_config?.options.find((option: IDataObject) => option[matchTo ?? 'id'] == value ) ?? {};
+									console.log(match);
+									if (!!match?.id) {
+										console.log('matched!!');
+										matchResult = outputType == 'object' ? match : match[outputType ?? 'id'];
 									}
 								} else {
-									val = customFieldValue.value ?? '';
-								}
-								if (fieldtype === 'date') {
-									val = new Date(val as string).getTime();
+									matchResult = "how did you get here?";
 								}
 								customFields.push({
-									id: fieldid,
-									value: val,
+									lookupValue: value,
+									matchTo: matchTo,
+									matchAgainst: `${field.name} - ${field.id}`,
+									outputType: outputType,
+									result: matchResult,
 								});
 							}
-							body.custom_fields = customFields;
+							responseData = customFields;
 						}
-						if (additionalFields.content) {
-							body.content = additionalFields.content as string;
-						}
-						if (additionalFields.assignees) {
-							body.assignees = additionalFields.assignees as string[];
-						}
-						if (additionalFields.tags) {
-							body.tags = additionalFields.tags as string[];
-						}
-						if (additionalFields.status) {
-							body.status = additionalFields.status as string;
-						}
-						if (additionalFields.priority) {
-							body.priority = additionalFields.priority as number;
-						}
-						if (additionalFields.dueDate) {
-							body.due_date = new Date(additionalFields.dueDate as string).getTime();
-						}
-						if (additionalFields.dueDateTime) {
-							body.due_date_time = additionalFields.dueDateTime as boolean;
-						}
-						if (additionalFields.timeEstimate) {
-							body.time_estimate = (additionalFields.timeEstimate as number) * 6000;
-						}
-						if (additionalFields.startDate) {
-							body.start_date = new Date(additionalFields.startDate as string).getTime();
-						}
-						if (additionalFields.startDateTime) {
-							body.start_date_time = additionalFields.startDateTime as boolean;
-						}
-						if (additionalFields.notifyAll) {
-							body.notify_all = additionalFields.notifyAll as boolean;
-						}
-						if (additionalFields.parentId) {
-							body.parent = additionalFields.parentId as string;
-						}
-						if (additionalFields.markdownContent) {
-							delete body.content;
-							body.markdown_content = additionalFields.content as string;
-						}
-						responseData = await clickupApiRequest.call(this, 'POST', `/list/${listId}/task`, body);
-					}
-					if (operation === 'update') {
-						const taskId = this.getNodeParameter('id', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i);
-						const body: ITask = {
-							assignees: {
-								add: [],
-								rem: [],
-							},
-						};
-						if (updateFields.content) {
-							body.content = updateFields.content as string;
-						}
-						if (updateFields.priority) {
-							body.priority = updateFields.priority as number;
-						}
-						if (updateFields.dueDate) {
-							body.due_date = new Date(updateFields.dueDate as string).getTime();
-						}
-						if (updateFields.dueDateTime) {
-							body.due_date_time = updateFields.dueDateTime as boolean;
-						}
-						if (updateFields.timeEstimate) {
-							body.time_estimate = (updateFields.timeEstimate as number) * 6000;
-						}
-						if (updateFields.startDate) {
-							body.start_date = new Date(updateFields.startDate as string).getTime();
-						}
-						if (updateFields.startDateTime) {
-							body.start_date_time = updateFields.startDateTime as boolean;
-						}
-						if (updateFields.notifyAll) {
-							body.notify_all = updateFields.notifyAll as boolean;
-						}
-						if (updateFields.name) {
-							body.name = updateFields.name as string;
-						}
-						if (updateFields.parentId) {
-							body.parent = updateFields.parentId as string;
-						}
-						if (updateFields.addAssignees) {
-							//@ts-ignore
-							body.assignees.add = (updateFields.addAssignees as string)
-								.split(',')
-								.map((e: string) => parseInt(e, 10));
-						}
-						if (updateFields.removeAssignees) {
-							//@ts-ignore
-							body.assignees.rem = (updateFields.removeAssignees as string)
-								.split(',')
-								.map((e: string) => parseInt(e, 10));
-						}
-						if (updateFields.status) {
-							body.status = updateFields.status as string;
-						}
-						if (updateFields.markdownContent) {
-							delete body.content;
-							body.markdown_content = updateFields.content as string;
-						}
-						responseData = await clickupApiRequest.call(this, 'PUT', `/task/${taskId}`, body);
-					}
-					if (operation === 'get') {
-						const taskId = this.getNodeParameter('id', i) as string;
-						responseData = await clickupApiRequest.call(this, 'GET', `/task/${taskId}`);
-					}
-					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i);
-						const filters = this.getNodeParameter('filters', i);
-						if (filters.archived) {
-							qs.archived = filters.archived as boolean;
-						}
-						if (filters.subtasks) {
-							qs.subtasks = filters.subtasks as boolean;
-						}
-						if (filters.includeClosed) {
-							qs.include_closed = filters.includeClosed as boolean;
-						}
-						if (filters.orderBy) {
-							qs.order_by = filters.orderBy as string;
-						}
-						if (filters.statuses) {
-							qs.statuses = filters.statuses as string[];
-						}
-						if (filters.assignees) {
-							qs.assignees = filters.assignees as string[];
-						}
-						if (filters.tags) {
-							qs.tags = filters.tags as string[];
-						}
-						if (filters.dueDateGt) {
-							qs.due_date_gt = new Date(filters.dueDateGt as string).getTime();
-						}
-						if (filters.dueDateLt) {
-							qs.due_date_lt = new Date(filters.dueDateLt as string).getTime();
-						}
-						if (filters.dateCreatedGt) {
-							qs.date_created_gt = new Date(filters.dateCreatedGt as string).getTime();
-						}
-						if (filters.dateCreatedLt) {
-							qs.date_created_lt = new Date(filters.dateCreatedLt as string).getTime();
-						}
-						if (filters.dateUpdatedGt) {
-							qs.date_updated_gt = new Date(filters.dateUpdatedGt as string).getTime();
-						}
-						if (filters.dateUpdatedLt) {
-							qs.date_updated_lt = new Date(filters.dateUpdatedLt as string).getTime();
-						}
-						if (filters.customFieldsUi) {
-							const customFieldsValues = (filters.customFieldsUi as IDataObject)
-								.customFieldsValues as IDataObject[];
-							if (customFieldsValues) {
-								const customFields: IDataObject[] = [];
-								for (const customFieldValue of customFieldsValues) {
-									customFields.push({
-										field_id: customFieldValue.fieldId,
-										operator:
-											customFieldValue.operator === 'equal' ? '=' : customFieldValue.operator,
-										value: customFieldValue.value as string,
-									});
-								}
-
-								qs.custom_fields = JSON.stringify(customFields);
-							}
-						}
-
-						const listId = this.getNodeParameter('list', i) as string;
-						if (returnAll) {
-							responseData = await clickupApiRequestAllItems.call(
-								this,
-								'tasks',
-								'GET',
-								`/list/${listId}/task`,
-								{},
-								qs,
-							);
-						} else {
-							qs.limit = this.getNodeParameter('limit', i);
-							responseData = await clickupApiRequestAllItems.call(
-								this,
-								'tasks',
-								'GET',
-								`/list/${listId}/task`,
-								{},
-								qs,
-							);
-							responseData = responseData.splice(0, qs.limit);
-						}
-					}
-					if (operation === 'member') {
-						const taskId = this.getNodeParameter('id', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i);
-						if (returnAll) {
-							responseData = await clickupApiRequest.call(
-								this,
-								'GET',
-								`/task/${taskId}/member`,
-								{},
-								qs,
-							);
-							responseData = responseData.members;
-						} else {
-							qs.limit = this.getNodeParameter('limit', i);
-							responseData = await clickupApiRequest.call(
-								this,
-								'GET',
-								`/task/${taskId}/member`,
-								{},
-								qs,
-							);
-							responseData = responseData.members;
-							responseData = responseData.splice(0, qs.limit);
-						}
-					}
-					if (operation === 'setCustomField') {
-						const taskId = this.getNodeParameter('task', i) as string;
-						const fieldId = this.getNodeParameter('field', i) as string;
-						const value = this.getNodeParameter('value', i) as string;
-						const jsonParse = this.getNodeParameter('jsonParse', i) as boolean;
-
-						const body: IDataObject = {};
-						body.value = value;
-						if (jsonParse) {
-							body.value = validateJSON(body.value);
-							if (body.value === undefined) {
-								throw new NodeOperationError(this.getNode(), 'Value is invalid JSON!', {
-									itemIndex: i,
-								});
-							}
-						} else {
-							//@ts-ignore
-							if (!isNaN(body.value)) {
-								body.value = parseInt(body.value, 10);
-							}
-						}
-						responseData = await clickupApiRequest.call(
-							this,
-							'POST',
-							`/task/${taskId}/field/${fieldId}`,
-							body,
-						);
-					}
-					if (operation === 'delete') {
-						const taskId = this.getNodeParameter('id', i) as string;
-						responseData = await clickupApiRequest.call(this, 'DELETE', `/task/${taskId}`, {});
-						responseData = { success: true };
 					}
 				}
-
+				responseData = responseData == undefined ? {} : responseData
 				const executionData = this.helpers.constructExecutionMetaData(
 					this.helpers.returnJsonArray(responseData),
 					{ itemData: { item: i } },

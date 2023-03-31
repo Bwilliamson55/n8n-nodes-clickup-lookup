@@ -40,7 +40,7 @@ export async function clickupApiRequest(
 		const authenticationMethod = this.getNodeParameter('authentication', 0) as string;
 
 		if (authenticationMethod === 'accessToken') {
-			console.log(`calling ${method} with options: ${JSON.stringify(options)}`);
+			// console.log(`calling ${method} with options: ${JSON.stringify(options)}`);
 			return await this.helpers.requestWithAuthentication.call(this, 'clickupLookupApi', options);
 		} else {
 			const oAuth2Options: IOAuth2Options = {

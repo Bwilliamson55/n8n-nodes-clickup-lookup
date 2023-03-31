@@ -1,14 +1,13 @@
 export interface ICustomFieldsUi {
 	customFieldsValues?: {
 		fieldKey?: string;
+		fieldOptionsReference?: {
+			name?: string;
+			value?: string|number|string[]|boolean
+		}
 		type?: string;
 		value?: string|number;
-		whenThis?: string;
-		dropDownMapperUi?: {
-			dropDownMapperValues?: {
-					saysThis?: string;
-					value?: string|number|string[]
-			}[];
-		};
+		matchTo?: string;
+		output?: string;
 	}[];
 }
