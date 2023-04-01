@@ -1,8 +1,12 @@
-# n8n-nodes-_node-name_
+# n8n-nodes-clickuplookup
 
-This is an n8n community node. It lets you use _app/service name_ in your n8n workflows.
+This is an n8n community node. It lets you easily compare values to drop-down fields and their options in ClickUp, in your n8n workflows.
 
-_App/service name_ is _one or two sentences describing the service this node integrates with_.
+[ClickUp](https://clickup.com) is a highly versatile and powerful project management tool that can be used by both teams and individuals. It combines important business application features and consolidates company project data into a single online solution.
+
+There is already a [core ClickUp node in n8n](https://n8n.io/integrations/clickup/) - but it does standard actions like getting and setting tasks, fields, settings, etc. ClickUp fields can be complex and dynamic - often you do not know the ID of the field you want to work with, or what values may be available there. The work arounds for comparing incoming data against field values or field value options are not fun. This node is intended to releive that pain.
+
+Currently this node only looks up against drop-down fields, one list at a time. This will be expanding to support other field types and scopes soon.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
@@ -18,31 +22,45 @@ _App/service name_ is _one or two sentences describing the service this node int
 
 Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
+I aim to give better instructions here as well for us docker users, especially around persisting the nodes between updates.
+
 ## Operations
 
-_List the operations supported by your node._
+- Task
+  - Field options lookup for dropdowns
+    - Input value as text or expression string
+    - Select field to target
+    - Match against field option..
+      - Id
+      - Name
+      - Color
+    - Output the options..
+      - Id
+      - Name
+      - Color
+      - Object (The field options whole object)
+    - Superficial dropdown field to reference existing options without leaving the node
 
 ## Credentials
 
-_If users need to authenticate with the app/service, provide details here. You should include prerequisites (such as signing up with the service), available authentication methods, and how to set them up._
+The credentials for this node mimic those for the builtin ClickUp node. While they are technically seperate in your credential types, the official documentation for the original implementation still applies: [https://docs.n8n.io/integrations/builtin/credentials/clickup/](https://docs.n8n.io/integrations/builtin/credentials/clickup/)
 
 ## Compatibility
 
-_State the minimum n8n version, as well as which versions you test against. You can also include any known version incompatibility issues._
+This is subject to change as the current version is 0.1.0. Currently working on n8n version 0.221.2
 
 ## Usage
 
-_This is an optional section. Use it to help users with any difficult or confusing aspects of the node._
-
-_By the time users are looking for community nodes, they probably already know n8n basics. But if you expect new users, you can link to the [Try it out](https://docs.n8n.io/try-it-out/) documentation to help them get started._
+This will be updated soon. Ish. 
 
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
-* _Link to app/service documentation._
+* [clickuplookup docs and repository](https://github.com/Bwilliamson55/n8n-nodes-clickup-lookup)
 
 ## Version history
 
-_This is another optional section. If your node has multiple versions, include a short description of available versions and what changed, as well as any compatibility impact._
+- 0.1.0 - Initial release
+  - Task lookups against dropdown field options
 
 
