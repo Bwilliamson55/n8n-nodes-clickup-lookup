@@ -47,7 +47,7 @@ The credentials for this node mimic those for the builtin ClickUp node. While th
 
 ## Compatibility
 
-This is subject to change as the current version is 0.1.0. Currently working on n8n version 0.221.2
+This is subject to change as the current version is 0.1.2. Currently working on n8n version 0.221.2
 
 ## Usage
 
