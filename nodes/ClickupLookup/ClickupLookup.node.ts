@@ -99,7 +99,6 @@ export class ClickupLookup implements INodeType {
 						value: teamId,
 					});
 				}
-				console.log(returnData)
 				return returnData;
 			},
 			// Get all the available spaces to display them to user so that he can
@@ -275,11 +274,11 @@ export class ClickupLookup implements INodeType {
 						// specify the types we know we can work with
 						[
 							//'short_text', 'text',
-							'drop_down',
-							//'labels', 'email', 'date'
+							'drop_down', 'labels',
+							// 'email', 'date'
 						].includes(field.type)
 					) {
-						const fieldName = field.name;
+						const fieldName = field.type + ' - ' + field.name;
 						const fieldId = field.id;
 						// Set the value to a easily splitable value for type detection
 						returnData.push({
@@ -309,7 +308,6 @@ export class ClickupLookup implements INodeType {
 				const listId = this.getCurrentNodeParameter('list') as string;
 				const { fields } = await clickupApiRequest.call(this, 'GET', `/list/${listId}/field`);
 				const field = fields.find((f: any) => f.id == id);
-				console.log(field.type_config);
 				return field.type_config?.options.map((option: IDataObject) => ({
 					name: `${option.label ?? option.name}`,
 					value: `${option.orderindex ?? option.id}`,
@@ -323,7 +321,6 @@ export class ClickupLookup implements INodeType {
 				const listId = this.getCurrentNodeParameter('list') as string;
 				const { fields } = await clickupApiRequest.call(this, 'GET', `/list/${listId}/field`);
 				const field = fields.find((f: any) => f.id == id);
-				console.log(field.type_config);
 				return field.type_config?.options.map((option: IDataObject) => ({
 					name: `${JSON.stringify(option, null, 2)}`,
 					value: `${JSON.stringify(option)}`,

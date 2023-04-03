@@ -187,7 +187,7 @@ export const taskFields: INodeProperties[] = [
 						},
 						displayOptions: {
 							show: {
-								type: ['drop_down'],
+								type: ['drop_down', 'labels'],
 							},
 						},
 						default: '',
@@ -208,22 +208,10 @@ export const taskFields: INodeProperties[] = [
 						noDataExpression: true,
 						displayOptions: {
 							show: {
-								type: ['drop_down'],
+								type: ['labels'],
 							},
 						},
 						options: [
-							{
-								name: 'ID',
-								value: 'id',
-								description: 'Match to the field options ID',
-								action: 'Match to field value Id',
-							},
-							{
-								name: 'Name',
-								value: 'name',
-								description: 'Match to the field options Name',
-								action: 'Match to field value Name',
-							},
 							{
 								name: 'Color',
 								value: 'color',
@@ -231,13 +219,57 @@ export const taskFields: INodeProperties[] = [
 								action: 'Match to field value Color',
 							},
 							{
+								name: 'ID',
+								value: 'id',
+								description: 'Match to the field options ID',
+								action: 'Match to field value Id',
+							},
+							{
+								name: 'Label',
+								value: 'label',
+								description: 'Match to the field options Label',
+								action: 'Match to field value Label',
+							},
+						],
+						default: 'id',
+					},
+					{
+						displayName: 'Match To',
+						name: 'matchTo',
+						type: 'options',
+						noDataExpression: true,
+						displayOptions: {
+							show: {
+								type: ['drop_down'],
+							},
+						},
+						options: [
+							{
+								name: 'Color',
+								value: 'color',
+								description: 'Match to the field options Color',
+								action: 'Match to field value Color',
+							},
+							{
+								name: 'ID',
+								value: 'id',
+								description: 'Match to the field options ID',
+								action: 'Match to field value Id',
+							},
+							{
 								name: 'Index',
 								value: 'orderindex',
 								description: 'Match to the field options OrderIndex',
 								action: 'Match to field value Index',
 							},
+							{
+								name: 'Name',
+								value: 'name',
+								description: 'Match to the field options Name',
+								action: 'Match to field value Name',
+							},
 						],
-						default: 'name',
+						default: 'id',
 					},
 					{
 						displayName: 'Output',
@@ -273,6 +305,44 @@ export const taskFields: INodeProperties[] = [
 								value: 'name',
 								description: 'Output the matched field options Name',
 								action: 'Output a matched field options Name',
+							},
+							{
+								name: 'Object',
+								value: 'object',
+								description: 'Output the matched field options Object',
+								action: 'Output a matched field options Color',
+							},
+						],
+						default: 'id',
+					},
+					{
+						displayName: 'Output',
+						name: 'output',
+						type: 'options',
+						noDataExpression: true,
+						displayOptions: {
+							show: {
+								type: ['labels'],
+							},
+						},
+						options: [
+							{
+								name: 'Color',
+								value: 'color',
+								description: 'Output the matched field options Color',
+								action: 'Output a matched field options Color',
+							},
+							{
+								name: 'ID',
+								value: 'id',
+								description: 'Output the matched field options ID',
+								action: 'Output a matched field options Id',
+							},
+							{
+								name: 'Label',
+								value: 'label',
+								description: 'Output the field options Label',
+								action: 'Output field Label',
 							},
 							{
 								name: 'Object',
