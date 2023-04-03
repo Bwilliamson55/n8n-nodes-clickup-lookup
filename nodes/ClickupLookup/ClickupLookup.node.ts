@@ -379,7 +379,7 @@ export class ClickupLookup implements INodeType {
 
 								//value is the value to lookup
 								const value = customFieldValue.value?.toString();
-								// id, name, color - name is default
+								// id, name, color, orderindex - name is default
 								const matchTo = customFieldValue.matchTo?.toString();
 								// id, name, color, object - id is default
 								const outputType = customFieldValue.output?.toString();
@@ -388,9 +388,7 @@ export class ClickupLookup implements INodeType {
 
 								if (['drop_down', 'labels'].includes(fieldtype?.toString() ?? '')) {
 									let match = field.type_config?.options.find((option: IDataObject) => option[matchTo ?? 'id'] == value ) ?? {};
-									console.log(match);
 									if (!!match?.id) {
-										console.log('matched!!');
 										matchResult = outputType == 'object' ? match : match[outputType ?? 'id'];
 									}
 								} else {

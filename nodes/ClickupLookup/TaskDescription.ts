@@ -171,23 +171,29 @@ export const taskFields: INodeProperties[] = [
 							'The ID of the field to lookup against. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 					},
 					{
-						displayName: 'Field Options Reference for Value or Name or ID',
+						displayName: 'Type',
+						name: 'type',
+						type: 'hidden',
+						default: '={{$parameter["&fieldKey"].split("|")[1]}}',
+					},
+					{
+						// eslint-disable-next-line n8n-nodes-base/node-param-display-name-wrong-for-dynamic-options
+						displayName: 'Field Options Reference',
 						name: 'fieldOptionsReference',
 						type: 'options',
 						typeOptions: {
 							loadOptionsMethod: 'getDropDownFieldValues',
 							loadOptionsDependsOn: ['fieldKey'],
 						},
+						displayOptions: {
+							show: {
+								type: ['drop_down'],
+							},
+						},
 						default: '',
 						// eslint-disable-next-line n8n-nodes-base/node-param-description-wrong-for-dynamic-options
 						description:
 							'This is just for reference and does not affect the output of this node or field',
-					},
-					{
-						displayName: 'Type',
-						name: 'type',
-						type: 'hidden',
-						default: '={{$parameter["&fieldKey"].split("|")[1]}}',
 					},
 					{
 						displayName: 'Lookup Value',
@@ -224,6 +230,12 @@ export const taskFields: INodeProperties[] = [
 								description: 'Match to the field options Color',
 								action: 'Match to field value Color',
 							},
+							{
+								name: 'Index',
+								value: 'orderindex',
+								description: 'Match to the field options OrderIndex',
+								action: 'Match to field value Index',
+							},
 						],
 						default: 'name',
 					},
@@ -239,22 +251,28 @@ export const taskFields: INodeProperties[] = [
 						},
 						options: [
 							{
+								name: 'Color',
+								value: 'color',
+								description: 'Output the matched field options Color',
+								action: 'Output a matched field options Color',
+							},
+							{
 								name: 'ID',
 								value: 'id',
 								description: 'Output the matched field options ID',
 								action: 'Output a matched field options Id',
 							},
 							{
+								name: 'Index',
+								value: 'orderindex',
+								description: 'Output the matched field options OrderIndex',
+								action: 'Output the matched field value Index',
+							},
+							{
 								name: 'Name',
 								value: 'name',
 								description: 'Output the matched field options Name',
 								action: 'Output a matched field options Name',
-							},
-							{
-								name: 'Color',
-								value: 'color',
-								description: 'Output the matched field options Color',
-								action: 'Output a matched field options Color',
 							},
 							{
 								name: 'Object',
