@@ -1,6 +1,5 @@
-import { IExecuteFunctions } from 'n8n-core';
-
 import {
+	IExecuteFunctions,
 	IDataObject,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
@@ -12,6 +11,7 @@ import {
 import { clickupApiRequest } from './GenericFunctions';
 
 import { taskFields, taskOperations } from './TaskDescription';
+import { taskTypeFields, taskTypeOperations } from './TaskTypeDescription';
 
 import type { ICustomFieldsUi } from './CustomFieldsUiInterface';
 
@@ -21,7 +21,7 @@ export class ClickupLookup implements INodeType {
 		name: 'clickupLookup',
 		icon: 'file:clickupLookup.svg',
 		group: ['output'],
-		version: 1,
+		version: 1.4,
 		subtitle: '={{$parameter["operation"] + ":" + $parameter["resource"]}}',
 		description: 'Map ClickUp custom fields to values',
 		defaults: {
@@ -76,10 +76,16 @@ export class ClickupLookup implements INodeType {
 						name: 'Lookup on Task',
 						value: 'task',
 					},
+					{
+						name: 'Custom Task Type',
+						value: 'customTaskType',
+					}
 				],
 				default: 'task',
 			},
 			...taskOperations,
+			...taskTypeOperations,
+			...taskTypeFields,
 			...taskFields,
 		],
 	};
@@ -105,8 +111,6 @@ export class ClickupLookup implements INodeType {
 			// select them easily
 			async getSpaces(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const teamId = this.getCurrentNodeParameter('team') as string;
-				console.log(`teamId: ${teamId}`);
-				console.log(this.getCurrentNodeParameters());
 				const returnData: INodePropertyOptions[] = [];
 				const { spaces } = await clickupApiRequest.call(this, 'GET', `/team/${teamId}/space`);
 				for (const space of spaces) {
@@ -245,7 +249,24 @@ export class ClickupLookup implements INodeType {
 				}
 				return returnData;
 			},
-
+			// Get all the available task types to display them to user so that he can
+			// select them easily
+			async getTaskTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const teamId = this.getCurrentNodeParameter('team') as string;
+				const returnData: INodePropertyOptions[] = [];
+				const { custom_items } = await clickupApiRequest.call(this, 'GET', `/team/${teamId}/custom_item`);
+				for (const taskType of custom_items) {
+					const taskTypeName = taskType.name;
+					const taskTypeId = taskType.id;
+					const taskTypeDescription = taskType.description;
+					returnData.push({
+						name: `${taskTypeId} - ${taskTypeName}`,
+						value: taskTypeId,
+						description: taskTypeDescription,
+					});
+				}
+				return returnData;
+			},
 			// Get all the custom fields to display them to user so that he can
 			// select them easily
 			async getCustomFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
@@ -384,9 +405,20 @@ export class ClickupLookup implements INodeType {
 								const field = fields.find((f: any) => f.id == fieldid);
 
 								if (['drop_down', 'labels'].includes(fieldtype?.toString() ?? '')) {
-									let match = field.type_config?.options.find((option: IDataObject) => option[matchTo ?? 'id'] == value ) ?? {};
-									if (!!match?.id) {
-										matchResult = outputType == 'object' ? match : match[outputType ?? 'id'];
+									// If value is empty or *, return all options in an object in the chosen outputType
+									if (!value || value == '*') {
+										// If outputType is object, return the whole array of options
+										if (outputType == 'object') {
+											matchResult = field.type_config?.options;
+										} else {
+											// Otherwise, return the array of options as an array of the chosen outputType
+											matchResult = field.type_config?.options.map((option: IDataObject) => option[outputType ?? 'id']);
+										}
+									} else {
+										let match = field.type_config?.options.find((option: IDataObject) => option[matchTo ?? 'id'] == value ) ?? {};
+										if (!!match?.id) {
+											matchResult = outputType == 'object' ? match : match[outputType ?? 'id'];
+										}
 									}
 								} else {
 									matchResult = "how did you get here?";
@@ -401,6 +433,19 @@ export class ClickupLookup implements INodeType {
 							}
 							responseData = customFields;
 						}
+					} else if (operation === 'customTaskType') {
+						const teamId = this.getNodeParameter('team', i) as string;
+						const { custom_items } = await clickupApiRequest.call(this, 'GET', `/team/${teamId}/custom_item`);
+						responseData = custom_items;
+					}
+				} else if (resource === 'customTaskType') {
+					if (operation === 'updateTaskWithType') {
+						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskType = this.getNodeParameter('taskType', i) as string;
+						const body = {
+							custom_item_id: taskType,
+						};
+						responseData = await clickupApiRequest.call(this, 'PUT', `/task/${taskId}`, body);
 					}
 				}
 				responseData = responseData == undefined ? {} : responseData

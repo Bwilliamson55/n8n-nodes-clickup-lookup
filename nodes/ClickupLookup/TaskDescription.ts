@@ -18,6 +18,12 @@ export const taskOperations: INodeProperties[] = [
 				description: 'Lookup options from task fields',
 				action: 'Lookup task field options',
 			},
+			{
+				name: 'Custom Task Type Lookup',
+				value: 'customTaskType',
+				description: 'Lookup custom task types',
+				action: 'Lookup custom task types',
+			}
 		],
 		default: 'lookup',
 	},
@@ -37,7 +43,7 @@ export const taskFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['task'],
-				operation: ['lookup'],
+				operation: ['lookup', 'customTaskType'],
 			},
 		},
 		typeOptions: {
@@ -181,6 +187,7 @@ export const taskFields: INodeProperties[] = [
 						displayName: 'Field Options Reference',
 						name: 'fieldOptionsReference',
 						type: 'options',
+						ignoreValidationDuringExecution: true,
 						typeOptions: {
 							loadOptionsMethod: 'getDropDownFieldValues',
 							loadOptionsDependsOn: ['fieldKey'],
@@ -199,7 +206,9 @@ export const taskFields: INodeProperties[] = [
 						displayName: 'Lookup Value',
 						name: 'value',
 						type: 'string',
-						default: '',
+						default: '*',
+						description:
+							'The value to lookup. If left empty or *, all options will be returned.',
 					},
 					{
 						displayName: 'Match To',
