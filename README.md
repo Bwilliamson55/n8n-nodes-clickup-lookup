@@ -26,9 +26,10 @@ I aim to give better instructions here as well for us docker users, especially a
 
 ## Operations
 
-- Task
-  - Field options lookup for dropdowns
+- Tasks
+  - Field options lookup for dropdowns and select fields
     - Input value as text or expression string
+      - '*' or empty will return all options in the chosen output format
     - Select field to target
     - Match against field option..
       - Id
@@ -40,6 +41,9 @@ I aim to give better instructions here as well for us docker users, especially a
       - Color
       - Object (The field options whole object)
     - Superficial dropdown field to reference existing options without leaving the node
+  - Custom Task Types lookup
+    - Currently clickup API only supports returning all custom task types per space, so this is a simple operation
+  - Update the custom task type on a given task ID
 
 ## Credentials
 
@@ -51,7 +55,24 @@ This is subject to change as the current version is 0.1.2. Currently working on 
 
 ## Usage
 
-This will be updated soon. Ish. 
+### Custom Task Types  
+This operation returns all custom task types for the chosen space. This is useful for getting the ID of a custom task type to use in the update custom task type operation.
+
+#### You can return all task types for a space:
+![Lookup custom task types](image.png)
+
+#### And update a given task with a new custom task type:
+![Update task type on task](image-1.png)
+
+### Field options lookup for dropdowns and select fields
+This operation is useful for comparing incoming data against field values or field value options. It can be used to check if a value exists in a dropdown field, or to get the ID of a dropdown option to use in the update task operation.
+
+#### You can return all options for a dropdown field:
+![Show all dropdown options](image-2.png)
+
+#### Or you can return a specific option by matching against the option's name, id, color, or index:
+![Show matching options from input value](image-3.png)
+
 
 ## Resources
 
@@ -62,5 +83,10 @@ This will be updated soon. Ish.
 
 - 0.1.0 - Initial release
   - Task lookups against dropdown field options
-
+- 0.1.4 - Add custom task types
+  - Lookup value to match against now allows '*' to return all options in the format chosen
+  - Added custom task types lookup
+    - Returns all custom task types for the chosen space
+  - Added update custom task type operation
+		- Update the custom task type on a given task ID
 
