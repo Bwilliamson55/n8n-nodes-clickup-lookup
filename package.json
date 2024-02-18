@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-clickuplookup",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A node to match values to clickup dropdown and labels field value options. More field type support soon.",
   "keywords": [
     "n8n-community-node-package", "clickup"
