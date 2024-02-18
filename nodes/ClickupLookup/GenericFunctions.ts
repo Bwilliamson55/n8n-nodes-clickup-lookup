@@ -6,7 +6,7 @@ import {
 	IHookFunctions,
 	ILoadOptionsFunctions,
 	IWebhookFunctions,
-} from 'n8n-core';
+} from 'n8n-workflow';
 
 import { IDataObject, IOAuth2Options, NodeApiError } from 'n8n-workflow';
 
